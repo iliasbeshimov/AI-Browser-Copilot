@@ -2,8 +2,8 @@ function extractPageData() {
   const data = {
     url: window.location.href,
     title: document.title,
-    text: document.body.innerText,
-    html: document.documentElement.outerHTML,
+    text: document.body.innerText.substring(0, 50000), // Limit to prevent memory issues
+    html: '', // Don't store full HTML to save memory
     images: [],
     links: [],
     metadata: {
@@ -17,25 +17,34 @@ function extractPageData() {
   };
 
   const images = document.querySelectorAll('img');
+  let imageCount = 0;
   images.forEach(img => {
-    if (img.src) {
+    if (img.src && imageCount < 100) { // Limit images to prevent memory issues
       data.images.push({
         src: img.src,
         alt: img.alt || '',
         title: img.title || '',
-        width: img.naturalWidth,
-        height: img.naturalHeight
+        width: img.naturalWidth || 0,
+        height: img.naturalHeight || 0
       });
+      imageCount++;
     }
   });
 
   const links = document.querySelectorAll('a[href]');
+  let linkCount = 0;
   links.forEach(link => {
-    data.links.push({
-      href: link.href,
-      text: link.textContent.trim(),
-      title: link.title || ''
-    });
+    if (linkCount < 200) { // Limit links to prevent memory issues
+      const linkText = link.textContent.trim();
+      if (linkText) { // Only include links with text
+        data.links.push({
+          href: link.href,
+          text: linkText.substring(0, 200), // Limit link text length
+          title: link.title || ''
+        });
+        linkCount++;
+      }
+    }
   });
 
   const metaTags = document.querySelectorAll('meta');

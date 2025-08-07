@@ -3,70 +3,93 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         processWithGemini(request.data)
             .then(result => sendResponse(result))
             .catch(error => sendResponse({ success: false, error: error.message }));
-        return true;
+        return true; // Keep message channel open for async response
     }
 });
 
 async function processWithGemini(data) {
     const { pageData, apiKey, systemPrompt, userPrompt, format } = data;
     
-    try {
-        const prompt = createPrompt(pageData, systemPrompt, userPrompt, format);
-        
-        const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'x-goog-api-key': apiKey,
-            },
-            body: JSON.stringify({
-                contents: [{
-                    parts: [{
-                        text: prompt
-                    }]
-                }],
-                generationConfig: {
-                    temperature: 0.1,
-                    topK: 1,
-                    topP: 1,
-                    maxOutputTokens: 8192,
+    const makeRequest = async (retryCount = 0) => {
+        try {
+            const prompt = createPrompt(pageData, systemPrompt, userPrompt, format);
+            
+            const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-goog-api-key': apiKey,
+                },
+                body: JSON.stringify({
+                    contents: [{
+                        parts: [{
+                            text: prompt
+                        }]
+                    }],
+                    generationConfig: {
+                        temperature: 0.1,
+                        topK: 1,
+                        topP: 1,
+                        maxOutputTokens: 8192,
+                    }
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                const errorMessage = errorData.error?.message || response.statusText;
+                
+                // Check if we should retry (transient errors)
+                const shouldRetry = (response.status === 429 || response.status >= 500) && retryCount < 3;
+                
+                if (shouldRetry) {
+                    const delay = Math.pow(2, retryCount) * 1000; // Exponential backoff
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    return makeRequest(retryCount + 1);
                 }
-            })
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            const errorMessage = errorData.error?.message || response.statusText;
-            
-            // Provide specific error guidance based on status code
-            let userMessage = `Gemini API error: ${errorMessage}`;
-            if (response.status === 400) {
-                userMessage = 'Invalid API request. Please check your prompts and try again.';
-            } else if (response.status === 401) {
-                userMessage = 'Invalid API key. Please check your Gemini API key and try again.';
-            } else if (response.status === 403) {
-                userMessage = 'API access denied. Please verify your API key has proper permissions.';
-            } else if (response.status === 429) {
-                userMessage = 'API rate limit exceeded. Please wait a few minutes and try again.';
-            } else if (response.status >= 500) {
-                userMessage = 'Gemini API is temporarily unavailable. Please try again in a few minutes.';
+                
+                // Provide specific error guidance based on status code
+                let userMessage = `Gemini API error: ${errorMessage}`;
+                if (response.status === 400) {
+                    userMessage = 'Invalid API request. Please check your prompts and try again.';
+                } else if (response.status === 401) {
+                    userMessage = 'Invalid API key. Please check your Gemini API key and try again.';
+                } else if (response.status === 403) {
+                    userMessage = 'API access denied. Please verify your API key has proper permissions.';
+                } else if (response.status === 429) {
+                    userMessage = 'API rate limit exceeded. Please wait a few minutes and try again.';
+                } else if (response.status >= 500) {
+                    userMessage = 'Gemini API is temporarily unavailable. Please try again in a few minutes.';
+                }
+                
+                throw new Error(userMessage);
             }
+
+            const result = await response.json();
             
-            throw new Error(userMessage);
-        }
+            if (!result.candidates || !result.candidates[0] || !result.candidates[0].content) {
+                throw new Error('Invalid response from Gemini API');
+            }
 
-        const result = await response.json();
-        
-        if (!result.candidates || !result.candidates[0] || !result.candidates[0].content) {
-            throw new Error('Invalid response from Gemini API');
+            const generatedContent = result.candidates[0].content.parts[0].text;
+            
+            await downloadFile(generatedContent, format, pageData.title || 'extracted_data');
+            
+            return { success: true, content: generatedContent };
+            
+        } catch (error) {
+            // Retry on network errors
+            if ((error.name === 'TypeError' || error.message.includes('network')) && retryCount < 3) {
+                const delay = Math.pow(2, retryCount) * 1000; // Exponential backoff
+                await new Promise(resolve => setTimeout(resolve, delay));
+                return makeRequest(retryCount + 1);
+            }
+            throw error;
         }
-
-        const generatedContent = result.candidates[0].content.parts[0].text;
-        
-        await downloadFile(generatedContent, format, pageData.title || 'extracted_data');
-        
-        return { success: true, content: generatedContent };
-        
+    };
+    
+    try {
+        return await makeRequest();
     } catch (error) {
         console.error('Error processing with Gemini:', error);
         throw error;

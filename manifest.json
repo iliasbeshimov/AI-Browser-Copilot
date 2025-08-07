@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "AI Browser Copilot",
-  "version": "1.0",
+  "version": "1.0.3",
   "description": "Extract page information and process it with Google Gemini API",
   "permissions": [
     "activeTab",

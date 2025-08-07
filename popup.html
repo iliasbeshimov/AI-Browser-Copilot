@@ -4,9 +4,26 @@
     <meta charset="utf-8">
     <style>
         body {
+            min-width: 350px;
+            max-width: 500px;
             width: 400px;
             padding: 20px;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        @media (max-width: 450px) {
+            body {
+                width: 300px;
+                padding: 15px;
+            }
+        }
+        fieldset {
+            border: none;
+            padding: 0;
+            margin: 0;
+        }
+        legend {
+            font-weight: 500;
+            margin-bottom: 10px;
         }
         .header {
             text-align: center;
@@ -101,6 +118,50 @@
             border-radius: 4px;
             margin-bottom: 15px;
         }
+        .version-info {
+            text-align: center;
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+            color: #666;
+        }
+        .progress-container {
+            margin: 10px 0;
+            display: none;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background-color: #e0e0e0;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background-color: #1a73e8;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .progress-text {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+            text-align: center;
+        }
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #1a73e8;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -110,45 +171,63 @@
 
     <div class="api-key-section">
         <label for="apiKey">Google Gemini API Key:</label>
-        <input type="password" id="apiKey" placeholder="Enter your Gemini API key">
-        <small>Your API key is stored locally and never shared.</small>
+        <input type="password" id="apiKey" placeholder="Enter your Gemini API key" 
+               aria-describedby="apiKeyHelp" required>
+        <small id="apiKeyHelp">Your API key is stored locally and never shared.</small>
     </div>
 
     <div class="section">
         <label for="systemPrompt">System Prompt:</label>
-        <textarea id="systemPrompt" placeholder="You are an AI assistant that extracts and formats web page data...">You are an AI assistant that extracts and formats web page data. Analyze the provided webpage content and extract the requested information in the specified format.</textarea>
+        <textarea id="systemPrompt" placeholder="You are an AI assistant that extracts and formats web page data..."
+                  aria-describedby="systemPromptHelp" maxlength="2000">You are an AI assistant that extracts and formats web page data. Analyze the provided webpage content and extract the requested information in the specified format.</textarea>
+        <small id="systemPromptHelp">Instructions for the AI (max 2000 characters)</small>
     </div>
 
     <div class="section">
         <label for="userPrompt">User Prompt:</label>
-        <textarea id="userPrompt" placeholder="Extract all product names and prices...">Extract the key information from this webpage and format it as requested.</textarea>
+        <textarea id="userPrompt" placeholder="Extract all product names and prices..."
+                  aria-describedby="userPromptHelp" maxlength="5000" required>Extract the key information from this webpage and format it as requested.</textarea>
+        <small id="userPromptHelp">Specific extraction request (max 5000 characters)</small>
     </div>
 
     <div class="section">
-        <label>Output Format:</label>
-        <div class="format-grid">
-            <div class="format-option">
-                <input type="radio" id="csv" name="format" value="csv" checked>
-                <label for="csv">CSV File</label>
+        <fieldset>
+            <legend>Output Format:</legend>
+            <div class="format-grid" role="radiogroup" aria-labelledby="formatLegend">
+                <div class="format-option">
+                    <input type="radio" id="csv" name="format" value="csv" checked>
+                    <label for="csv">CSV File</label>
+                </div>
+                <div class="format-option">
+                    <input type="radio" id="text" name="format" value="text">
+                    <label for="text">Text File</label>
+                </div>
+                <div class="format-option">
+                    <input type="radio" id="json" name="format" value="json">
+                    <label for="json">JSON File</label>
+                </div>
+                <div class="format-option">
+                    <input type="radio" id="links" name="format" value="links">
+                    <label for="links">Links List</label>
+                </div>
             </div>
-            <div class="format-option">
-                <input type="radio" id="text" name="format" value="text">
-                <label for="text">Text File</label>
-            </div>
-            <div class="format-option">
-                <input type="radio" id="json" name="format" value="json">
-                <label for="json">JSON File</label>
-            </div>
-            <div class="format-option">
-                <input type="radio" id="links" name="format" value="links">
-                <label for="links">Links List</label>
-            </div>
-        </div>
+        </fieldset>
     </div>
 
     <button id="extractBtn" class="button">Extract & Process</button>
     
+    <div id="progressContainer" class="progress-container">
+        <div class="progress-bar">
+            <div id="progressFill" class="progress-fill"></div>
+        </div>
+        <div id="progressText" class="progress-text">Initializing...</div>
+    </div>
+    
     <div id="status" class="status"></div>
+    
+    <div class="version-info">
+        <small>AI Browser Copilot v<span id="version">1.0.3</span></small>
+    </div>
 
     <script src="popup.js"></script>
 </body>
