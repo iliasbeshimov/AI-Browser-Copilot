@@ -13,10 +13,11 @@ async function processWithGemini(data) {
     try {
         const prompt = createPrompt(pageData, systemPrompt, userPrompt, format);
         
-        const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=' + apiKey, {
+        const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'x-goog-api-key': apiKey,
             },
             body: JSON.stringify({
                 contents: [{
@@ -34,8 +35,24 @@ async function processWithGemini(data) {
         });
 
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(`Gemini API error: ${errorData.error?.message || response.statusText}`);
+            const errorData = await response.json().catch(() => ({}));
+            const errorMessage = errorData.error?.message || response.statusText;
+            
+            // Provide specific error guidance based on status code
+            let userMessage = `Gemini API error: ${errorMessage}`;
+            if (response.status === 400) {
+                userMessage = 'Invalid API request. Please check your prompts and try again.';
+            } else if (response.status === 401) {
+                userMessage = 'Invalid API key. Please check your Gemini API key and try again.';
+            } else if (response.status === 403) {
+                userMessage = 'API access denied. Please verify your API key has proper permissions.';
+            } else if (response.status === 429) {
+                userMessage = 'API rate limit exceeded. Please wait a few minutes and try again.';
+            } else if (response.status >= 500) {
+                userMessage = 'Gemini API is temporarily unavailable. Please try again in a few minutes.';
+            }
+            
+            throw new Error(userMessage);
         }
 
         const result = await response.json();
@@ -93,6 +110,17 @@ ${contextData.links.map(link => `- ${link.href} (Text: ${link.text})`).join('\n'
 Please process this data according to the user request and output in the specified format.`;
 }
 
+function sanitizeFilename(filename) {
+    // Remove or replace invalid filename characters
+    return filename
+        .replace(/[<>:"/\\|?*]/g, '_')  // Replace invalid chars with underscore
+        .replace(/\s+/g, '_')           // Replace spaces with underscore
+        .replace(/_+/g, '_')            // Replace multiple underscores with single
+        .replace(/^_|_$/g, '')          // Remove leading/trailing underscores
+        .substring(0, 100)              // Limit length to 100 chars
+        || 'extracted_data';            // Fallback if empty
+}
+
 async function downloadFile(content, format, filename) {
     const timestamp = new Date().toISOString().slice(0, 19).replace(/[:.]/g, '-');
     const extensions = {
@@ -103,7 +131,8 @@ async function downloadFile(content, format, filename) {
     };
     
     const extension = extensions[format] || 'txt';
-    const downloadFilename = `${filename}_${timestamp}.${extension}`;
+    const sanitizedFilename = sanitizeFilename(filename);
+    const downloadFilename = `${sanitizedFilename}_${timestamp}.${extension}`;
     
     const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);

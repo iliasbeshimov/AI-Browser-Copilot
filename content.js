@@ -72,8 +72,14 @@ function extractPageData() {
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'extractPageData') {
-    const pageData = extractPageData();
-    sendResponse({ success: true, data: pageData });
+    try {
+      const pageData = extractPageData();
+      sendResponse({ success: true, data: pageData });
+    } catch (error) {
+      console.error('Error extracting page data:', error);
+      sendResponse({ success: false, error: error.message });
+    }
+    return true; // Keep message channel open for async response
   }
 });
 

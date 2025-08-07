@@ -51,10 +51,29 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
             
+            // Check if content script is ready by injecting it if needed
+            try {
+                await chrome.scripting.executeScript({
+                    target: { tabId: tab.id },
+                    func: () => {
+                        // Test if content script is loaded
+                        return typeof window.extractPageData !== 'undefined';
+                    }
+                });
+            } catch (error) {
+                // Inject content script if not present
+                await chrome.scripting.executeScript({
+                    target: { tabId: tab.id },
+                    files: ['content.js']
+                });
+                // Wait a moment for script to initialize
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            
             const response = await chrome.tabs.sendMessage(tab.id, { action: 'extractPageData' });
             
-            if (!response.success) {
-                throw new Error('Failed to extract page data');
+            if (!response || !response.success) {
+                throw new Error('Failed to extract page data - please refresh the page and try again');
             }
 
             const result = await chrome.runtime.sendMessage({
@@ -76,7 +95,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         } catch (error) {
             console.error('Error:', error);
-            showStatus(`❌ Error: ${error.message}`, true);
+            
+            // Provide user-friendly error messages
+            let userMessage = error.message;
+            if (error.message.includes('Failed to extract page data')) {
+                userMessage = 'Unable to extract data from this page. Please refresh the page and try again.';
+            } else if (error.message.includes('Extension context invalidated')) {
+                userMessage = 'Extension needs to be refreshed. Please reload the extension and try again.';
+            } else if (error.message.includes('Cannot access')) {
+                userMessage = 'Cannot access this page. Please try on a different website.';
+            } else if (error.message.includes('network')) {
+                userMessage = 'Network error. Please check your internet connection and try again.';
+            }
+            
+            showStatus(`❌ ${userMessage}`, true);
         } finally {
             extractBtn.disabled = false;
             extractBtn.textContent = 'Extract & Process';
