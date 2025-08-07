@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            width: 400px;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            margin: 0;
+            color: #1a73e8;
+            font-size: 18px;
+        }
+        .section {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        textarea, input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        .format-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .format-option {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .format-option:hover {
+            background-color: #f5f5f5;
+        }
+        .format-option input[type="radio"] {
+            width: auto;
+            margin-right: 8px;
+        }
+        .button {
+            width: 100%;
+            padding: 12px;
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        .button:hover {
+            background-color: #1557b0;
+        }
+        .button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .status {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            display: none;
+        }
+        .status.success {
+            background-color: #e8f5e8;
+            color: #0f5132;
+            border: 1px solid #a3cfbb;
+        }
+        .status.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f1aeb5;
+        }
+        .api-key-section {
+            background-color: #f9f9f9;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🤖 AI Browser Copilot</h1>
+    </div>
+
+    <div class="api-key-section">
+        <label for="apiKey">Google Gemini API Key:</label>
+        <input type="password" id="apiKey" placeholder="Enter your Gemini API key">
+        <small>Your API key is stored locally and never shared.</small>
+    </div>
+
+    <div class="section">
+        <label for="systemPrompt">System Prompt:</label>
+        <textarea id="systemPrompt" placeholder="You are an AI assistant that extracts and formats web page data...">You are an AI assistant that extracts and formats web page data. Analyze the provided webpage content and extract the requested information in the specified format.</textarea>
+    </div>
+
+    <div class="section">
+        <label for="userPrompt">User Prompt:</label>
+        <textarea id="userPrompt" placeholder="Extract all product names and prices...">Extract the key information from this webpage and format it as requested.</textarea>
+    </div>
+
+    <div class="section">
+        <label>Output Format:</label>
+        <div class="format-grid">
+            <div class="format-option">
+                <input type="radio" id="csv" name="format" value="csv" checked>
+                <label for="csv">CSV File</label>
+            </div>
+            <div class="format-option">
+                <input type="radio" id="text" name="format" value="text">
+                <label for="text">Text File</label>
+            </div>
+            <div class="format-option">
+                <input type="radio" id="json" name="format" value="json">
+                <label for="json">JSON File</label>
+            </div>
+            <div class="format-option">
+                <input type="radio" id="links" name="format" value="links">
+                <label for="links">Links List</label>
+            </div>
+        </div>
+    </div>
+
+    <button id="extractBtn" class="button">Extract & Process</button>
+    
+    <div id="status" class="status"></div>
+
+    <script src="popup.js"></script>
+</body>
+</html>

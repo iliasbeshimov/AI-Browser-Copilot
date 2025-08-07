@@ -1,0 +1,46 @@
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Chrome extension temp files
+*.crx
+*.pem
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Node modules (if we add build tools later)
+node_modules/
+package-lock.json
+yarn.lock
+
+# API keys (security)
+config.js
+secrets.js
+.env
+.env.local
+.env.production
+
+# Test files
+test-results/
+coverage/

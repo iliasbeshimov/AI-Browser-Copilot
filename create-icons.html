@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Browser Copilot Icons</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .icon-container { 
+            display: inline-block; 
+            margin: 20px; 
+            text-align: center; 
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+        .icon { margin: 10px; }
+        h3 { margin: 5px 0; }
+    </style>
+</head>
+<body>
+    <h1>AI Browser Copilot Extension Icons</h1>
+    <p>Right-click each icon and "Save image as" to create PNG files for the extension.</p>
+    
+    <div class="icon-container">
+        <h3>16x16 Icon</h3>
+        <svg class="icon" width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+            <rect width="16" height="16" rx="3" fill="#1a73e8"/>
+            <path d="M3 5h10v1H3zM3 7h10v1H3zM3 9h7v1H3z" fill="white"/>
+            <circle cx="12" cy="9.5" r="1.5" fill="#4285f4"/>
+        </svg>
+    </div>
+
+    <div class="icon-container">
+        <h3>48x48 Icon</h3>
+        <svg class="icon" width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+            <rect width="48" height="48" rx="8" fill="#1a73e8"/>
+            <rect x="8" y="12" width="32" height="3" rx="1.5" fill="white"/>
+            <rect x="8" y="18" width="32" height="3" rx="1.5" fill="white"/>
+            <rect x="8" y="24" width="20" height="3" rx="1.5" fill="white"/>
+            <rect x="8" y="30" width="24" height="3" rx="1.5" fill="white"/>
+            <circle cx="36" cy="25.5" r="6" fill="#4285f4"/>
+            <path d="M33 25.5l2 2 4-4" stroke="white" stroke-width="1.5" fill="none"/>
+        </svg>
+    </div>
+
+    <div class="icon-container">
+        <h3>128x128 Icon</h3>
+        <svg class="icon" width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+            <rect width="128" height="128" rx="20" fill="#1a73e8"/>
+            <rect x="20" y="30" width="88" height="8" rx="4" fill="white"/>
+            <rect x="20" y="46" width="88" height="8" rx="4" fill="white"/>
+            <rect x="20" y="62" width="60" height="8" rx="4" fill="white"/>
+            <rect x="20" y="78" width="70" height="8" rx="4" fill="white"/>
+            <circle cx="94" cy="70" r="18" fill="#4285f4"/>
+            <path d="M85 70l6 6 12-12" stroke="white" stroke-width="4" fill="none"/>
+            <rect x="20" y="94" width="50" height="4" rx="2" fill="rgba(255,255,255,0.7)"/>
+        </svg>
+    </div>
+
+    <div class="icon-container">
+        <h3>Alternative Design - 128x128</h3>
+        <svg class="icon" width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#1a73e8;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#4285f4;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+            <rect width="128" height="128" rx="20" fill="url(#grad1)"/>
+            <g transform="translate(16, 16)">
+                <!-- Document lines -->
+                <rect x="8" y="16" width="80" height="6" rx="3" fill="white" opacity="0.9"/>
+                <rect x="8" y="28" width="80" height="6" rx="3" fill="white" opacity="0.8"/>
+                <rect x="8" y="40" width="60" height="6" rx="3" fill="white" opacity="0.7"/>
+                <rect x="8" y="52" width="70" height="6" rx="3" fill="white" opacity="0.6"/>
+                
+                <!-- AI Brain/Gear -->
+                <circle cx="76" cy="64" r="20" fill="white" opacity="0.2"/>
+                <circle cx="76" cy="64" r="16" fill="none" stroke="white" stroke-width="3"/>
+                <circle cx="76" cy="64" r="6" fill="white"/>
+                
+                <!-- AI connection lines -->
+                <line x1="60" y1="64" x2="68" y2="64" stroke="white" stroke-width="2" opacity="0.8"/>
+                <line x1="84" y1="64" x2="92" y2="64" stroke="white" stroke-width="2" opacity="0.8"/>
+                <line x1="76" y1="48" x2="76" y2="56" stroke="white" stroke-width="2" opacity="0.8"/>
+                <line x1="76" y1="72" x2="76" y2="80" stroke="white" stroke-width="2" opacity="0.8"/>
+            </g>
+        </svg>
+    </div>
+
+    <script>
+        // Instructions for creating PNG files
+        document.addEventListener('DOMContentLoaded', function() {
+            const instructions = document.createElement('div');
+            instructions.innerHTML = `
+                <h2>Instructions to create PNG files:</h2>
+                <ol>
+                    <li>Right-click on each icon above</li>
+                    <li>Select "Save image as..." or "Copy image"</li>
+                    <li>Save them as:
+                        <ul>
+                            <li>icon16.png (16x16)</li>
+                            <li>icon48.png (48x48)</li>
+                            <li>icon128.png (128x128)</li>
+                        </ul>
+                    </li>
+                    <li>Place the PNG files in the icons/ folder</li>
+                </ol>
+                <p><strong>Alternative:</strong> You can also take screenshots of each icon and resize them to the exact dimensions needed.</p>
+            `;
+            instructions.style.background = '#f5f5f5';
+            instructions.style.padding = '15px';
+            instructions.style.marginTop = '20px';
+            instructions.style.borderRadius = '5px';
+            document.body.appendChild(instructions);
+        });
+    </script>
+</body>
+</html>
